@@ -1,6 +1,6 @@
 # C-Mamba: Channel Correlation Enhanced State Space Models for Multivariate Time Series Forecasting
 
-In this repository, we present the code of "C-Mamba: Channel Correlation Enhanced State Space Models for Multivariate Time Series Forecasting".
+In this repository, we present the code of ["C-Mamba: Channel Correlation Enhanced State Space Models for Multivariate Time Series Forecasting"](https://arxiv.org/abs/2406.05316).
 
 ![CMamba](./fig/mainfig.png)
 
