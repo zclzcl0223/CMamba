@@ -1,7 +1,7 @@
 from data_provider.data_factory import data_provider
 from torch.optim import lr_scheduler
 from exp.exp_basic import Exp_Basic
-from utils.tools import EarlyStopping, adjust_learning_rate, visual
+from utils.tools import EarlyStopping, adjust_learning_rate, visual, AverageMeter
 from utils.metrics import metric
 import torch
 import torch.nn as nn
@@ -34,11 +34,16 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return model_optim
 
     def _select_criterion(self):
-        criterion = nn.MSELoss()
+        if self.args.loss.lower() == 'mae':
+            criterion = nn.L1Loss()
+        elif self.args.loss.lower() == 'mse':
+            criterion = nn.MSELoss()
+        else:
+            raise NotImplementedError
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
-        total_loss = []
+        total_loss = AverageMeter()
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
@@ -67,13 +72,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
-                pred = outputs.detach().cpu()
-                true = batch_y.detach().cpu()
+                loss = criterion(outputs, batch_y)
 
-                loss = criterion(pred, true)
+                total_loss.update(loss.item(), outputs.shape[0])
 
-                total_loss.append(loss)
-        total_loss = np.average(total_loss)
         self.model.train()
         return total_loss
 
@@ -93,6 +95,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
+        #l1 = nn.L1Loss()
 
         if self.args.lradj == 'TST':
             scheduler = lr_scheduler.OneCycleLR(optimizer=model_optim,
@@ -105,7 +108,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         for epoch in range(self.args.train_epochs):
             iter_count = 0
-            train_loss = []
+            train_loss = AverageMeter()
 
             self.model.train()
             epoch_time = time.time()
@@ -140,7 +143,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs = outputs[:, -self.args.pred_len:, f_dim:]
                         batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                         loss = criterion(outputs, batch_y)
-                        train_loss.append(loss.item())
+                        train_loss.update(loss.item(), outputs.shape[0])
                 else:
                     if self.args.output_attention:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
@@ -151,7 +154,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     outputs = outputs[:, -self.args.pred_len:, f_dim:]
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                     loss = criterion(outputs, batch_y)
-                    train_loss.append(loss.item())
+                    train_loss.update(loss.item(), outputs.shape[0])
 
                 if (i + 1) % 100 == 0:
                     print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
@@ -172,15 +175,15 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.lradj == 'TST':
                     adjust_learning_rate(model_optim, epoch + 1, self.args, scheduler=scheduler, printout=False)
                     scheduler.step()
-                    
+                
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
-            train_loss = np.average(train_loss)
+            #train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
             test_loss = self.vali(test_data, test_loader, criterion)
 
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
-                epoch + 1, train_steps, train_loss, vali_loss, test_loss))
-            early_stopping(vali_loss, self.model, path)
+                epoch + 1, train_steps, train_loss.avg, vali_loss.avg, test_loss.avg))
+            early_stopping(vali_loss.avg, self.model, path)
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
@@ -196,7 +199,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return self.model
 
     def test(self, setting, test=0):
-        test_data, test_loader = self._get_data(flag='test')
+        batch_size = self.args.batch_size
+        self.args.batch_size = 1
+        test_data, test_loader = self._get_data(flag='test') # plot curve
+        self.args.batch_size = batch_size
         if test:
             print('loading model')
             self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth')))
@@ -249,8 +255,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 pred = outputs
                 true = batch_y
 
-                preds.append(pred)
-                trues.append(true)
+                preds.extend(pred)
+                trues.extend(true)
                 if i % 20 == 0:
                     input = batch_x.detach().cpu().numpy()
                     if test_data.scale and self.args.inverse:
@@ -268,9 +274,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         print('test shape:', preds.shape, trues.shape)
 
         # result save
-        folder_path = './results/' + setting + '/'
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+        # folder_path = './results/' + setting + '/'
+        # if not os.path.exists(folder_path):
+        #     os.makedirs(folder_path)
 
         mae, mse, rmse, mape, mspe = metric(preds, trues)
         print('mse:{}, mae:{}'.format(mse, mae))
@@ -281,8 +287,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         f.write('\n')
         f.close()
 
-        np.save(folder_path + 'metrics.npy', np.array([mae, mse, rmse, mape, mspe]))
-        np.save(folder_path + 'pred.npy', preds)
-        np.save(folder_path + 'true.npy', trues)
+        # np.save(folder_path + 'metrics.npy', np.array([mae, mse, rmse, mape, mspe]))
+        # np.save(folder_path + 'pred.npy', preds)
+        # np.save(folder_path + 'true.npy', trues)
 
         return

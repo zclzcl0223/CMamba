@@ -4,8 +4,18 @@ if [ ! -d "./log" ]; then
     mkdir ./log
 fi
 
+if [ ! -d "./log/CMamba" ]; then
+    mkdir ./log/CMamba
+fi
+
+if [ ! -d "./log/CMamba/traffic" ]; then
+    mkdir ./log/CMamba/traffic
+fi
+
 model_name=CMamba 
 
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 96
@@ -20,7 +30,7 @@ python -u run.py \
   --data custom \
   --features M \
   --seq_len $seq_len \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 4 \
   --lradj type3 \
@@ -41,15 +51,19 @@ python -u run.py \
   --learning_rate 0.001 \
   --channel_mixup \
   --sigma 4.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 8 \
-  --itr 1 >> ./log/log_traffic_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/traffic/$seq_len'_'$pred_len.txt
+done
 done
 done
 
 
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 192
@@ -64,7 +78,7 @@ python -u run.py \
   --data custom \
   --features M \
   --seq_len $seq_len \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 4 \
   --lradj type3 \
@@ -77,23 +91,26 @@ python -u run.py \
   --d_model 128 \
   --d_ff 128 \
   --des 'Exp' \
-  --batch_size 4 \
+  --batch_size 8 \
   --num_workers 1 \
   --pscan \
   --head_dropout 0.0 \
   --dropout 0.0 \
-  --learning_rate 0.001 \
+  --learning_rate 0.002 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 8 \
-  --itr 1 >> ./log/log_traffic_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/traffic/$seq_len'_'$pred_len.txt
+done
 done
 done
 
-
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 336
@@ -108,7 +125,7 @@ python -u run.py \
   --data custom \
   --features M \
   --seq_len $seq_len \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 4 \
   --lradj type3 \
@@ -121,23 +138,26 @@ python -u run.py \
   --d_model 128 \
   --d_ff 128 \
   --des 'Exp' \
-  --batch_size 4 \
+  --batch_size 8 \
   --num_workers 1 \
   --pscan \
   --head_dropout 0.0 \
   --dropout 0.0 \
-  --learning_rate 0.001 \
+  --learning_rate 0.002 \
   --channel_mixup \
   --sigma 3.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 8 \
-  --itr 1 >> ./log/log_traffic_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/traffic/$seq_len'_'$pred_len.txt
+done
 done
 done
 
-
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 720
@@ -152,7 +172,7 @@ python -u run.py \
   --data custom \
   --features M \
   --seq_len $seq_len \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 4 \
   --d_layers 1 \
@@ -166,18 +186,21 @@ python -u run.py \
   --d_model 128 \
   --d_ff 128 \
   --des 'Exp' \
-  --batch_size 2 \
+  --batch_size 8 \
   --num_workers 1 \
   --pscan \
   --head_dropout 0.0 \
   --dropout 0.0 \
-  --learning_rate 0.001 \
+  --learning_rate 0.002 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 8 \
-  --itr 1 >> ./log/log_traffic_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/traffic/$seq_len'_'$pred_len.txt
 done
 done
+done
+'

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from layers.Invertible import RevIN
-from layers.ChannelAttention import ChannelAttention
+from layers.GDDMLP import GDDMLP
 
 class Model(nn.Module):
     def __init__(self, configs):
@@ -17,10 +17,10 @@ class Model(nn.Module):
         self.Linear = nn.ModuleList([
             nn.Linear(self.seq_len, self.pred_len) for _ in range(configs.enc_in)
         ]) if configs.individual else nn.Linear(self.seq_len, self.pred_len)
-        self.channel_att = configs.channel_att
-        if self.channel_att:
-            print("Channel Attention")
-            self.ChannelAttention = ChannelAttention(configs.c_out, configs.reduction, 
+        self.gddmlp = configs.gddmlp
+        if self.gddmlp:
+            print("Insert GDDMLP")
+            self.GDDMLP = GDDMLP(configs.c_out, configs.reduction, 
                                                  configs.avg, configs.max)
         self.dropout = nn.Dropout(configs.dropout)
         self.rev = RevIN(configs.c_out) if configs.rev else None
@@ -41,10 +41,10 @@ class Model(nn.Module):
             for idx, proj in enumerate(self.Linear):
                 pred[:, :, idx] = proj(x[:, :, idx])
         else:
-            if self.channel_att:
+            if self.gddmlp:
                 x = x.transpose(1, 2)
-                x = self.ChannelAttention(x.unsqueeze(-1))
-                x = x.squeeze(-1)
+                x = self.GDDMLP(x.unsqueeze(-2))
+                x = x.squeeze(-2)
                 x = x.transpose(1, 2)
             pred = self.Linear(x.transpose(1, 2)).transpose(1, 2)
         pred = self.rev(pred, 'denorm') if self.rev else pred

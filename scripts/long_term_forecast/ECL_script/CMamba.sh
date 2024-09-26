@@ -4,8 +4,19 @@ if [ ! -d "./log" ]; then
     mkdir ./log
 fi
 
+if [ ! -d "./log/CMamba" ]; then
+    mkdir ./log/CMamba
+fi
+
+if [ ! -d "./log/CMamba/ecl" ]; then
+    mkdir ./log/CMamba/ecl
+fi
+
 model_name=CMamba
 
+
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 96
@@ -23,7 +34,7 @@ python -u run.py \
   --lradj type3 \
   --train_epochs 100 \
   --patience 3 \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 5 \
   --factor 3 \
@@ -41,15 +52,18 @@ python -u run.py \
   --learning_rate 0.001 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 4 \
-  --itr 1 >> ./log/log_ecl_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/ecl/$seq_len'_'$pred_len.txt
+done
 done
 done
 
-
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 192
@@ -67,7 +81,7 @@ python -u run.py \
   --lradj type3 \
   --train_epochs 100 \
   --patience 3 \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 5 \
   --factor 3 \
@@ -85,15 +99,19 @@ python -u run.py \
   --learning_rate 0.001 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 4 \
-  --itr 1 >> ./log/log_ecl_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/ecl/$seq_len'_'$pred_len.txt
+done
 done
 done
 
 
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 336
@@ -110,8 +128,8 @@ python -u run.py \
   --seq_len $seq_len \
   --lradj type3 \
   --train_epochs 100 \
-  --patience 5 \
-  --label_len 48 \
+  --patience 3 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 5 \
   --factor 3 \
@@ -121,7 +139,7 @@ python -u run.py \
   --des 'Exp' \
   --d_model 128 \
   --d_ff 128 \
-  --batch_size 4 \
+  --batch_size 8 \
   --pscan \
   --head_dropout 0.0 \
   --dropout 0.0 \
@@ -129,15 +147,19 @@ python -u run.py \
   --learning_rate 0.0005 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 4 \
-  --itr 1 >> ./log/log_ecl_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/ecl/$seq_len'_'$pred_len.txt
+done
 done
 done
 
 
+for seed in 2021
+do
 for seq_len in 96
 do
 for pred_len in 720
@@ -155,7 +177,7 @@ python -u run.py \
   --lradj type3 \
   --train_epochs 100 \
   --patience 3 \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --e_layers 5 \
   --factor 3 \
@@ -165,18 +187,20 @@ python -u run.py \
   --des 'Exp' \
   --d_model 128 \
   --d_ff 128 \
-  --batch_size 4 \
+  --batch_size 8 \
   --pscan \
   --head_dropout 0.0 \
   --dropout 0.0 \
   --num_workers 1 \
-  --learning_rate 0.0001 \
+  --learning_rate 0.0005 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 4 \
-  --itr 1 >> ./log/log_ecl_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/ecl/$seq_len'_'$pred_len.txt
+done
 done
 done

@@ -11,7 +11,7 @@ class Exp_Basic(object):
             'iTransformer': iTransformer,
             'PatchTST': PatchTST,
             'RLinear': RLinear,
-            'TimesNet': TimesNet
+            'TimesNet': TimesNet,
         }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)

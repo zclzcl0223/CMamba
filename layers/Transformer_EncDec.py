@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from layers.ChannelAttention import ChannelAttention
-
+from layers.GDDMLP import GDDMLP
 
 class ConvLayer(nn.Module):
     def __init__(self, c_in):
@@ -24,9 +23,8 @@ class ConvLayer(nn.Module):
         x = x.transpose(1, 2)
         return x
 
-
 class EncoderLayer(nn.Module):
-    def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu", channel_att=False, configs=None):
+    def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu", gddmlp=False, configs=None):
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.attention = attention
@@ -36,15 +34,15 @@ class EncoderLayer(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
-        self.channel_att = channel_att
+        self.gddmlp = gddmlp
         self.configs = configs
-        if self.channel_att:
-            print("Channel Attention")
+        if self.gddmlp:
+            print("Insert GDDMLP")
             if configs.model in ['iTransformer']:
-                self.ChannelAttention = ChannelAttention(configs.c_out+4, configs.reduction, 
+                self.GDDMLP = GDDMLP(configs.c_out+4, configs.reduction, 
                                                         configs.avg, configs.max)
             else:
-                self.ChannelAttention = ChannelAttention(configs.c_out, configs.reduction, 
+                self.GDDMLP = GDDMLP(configs.c_out, configs.reduction, 
                                                     configs.avg, configs.max)
 
     def forward(self, x, attn_mask=None, tau=None, delta=None):
@@ -58,17 +56,16 @@ class EncoderLayer(nn.Module):
         y = x = self.norm1(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1, 1))))
         y = self.dropout(self.conv2(y).transpose(-1, 1))
-        if self.channel_att:
+        if self.gddmlp:
             if self.configs.model in ['iTransformer']:
-                y = self.ChannelAttention(y.unsqueeze(-1))
-                y = y.squeeze(-1)
+                y = self.GDDMLP(y.unsqueeze(-2))
+                y = y.squeeze(-2)
 
             elif self.configs.model in ['PatchTST']:
-                y = self.ChannelAttention(y.reshape(-1, self.configs.c_out, 
+                y = self.GDDMLP(y.reshape(-1, self.configs.c_out, 
                                                           y.shape[-2], y.shape[-1]))
                 y = y.reshape(-1, y.shape[-2], y.shape[-1])
         return self.norm2(x + y), attn
-
 
 class Encoder(nn.Module):
     def __init__(self, attn_layers, conv_layers=None, norm_layer=None):
@@ -133,7 +130,6 @@ class DecoderLayer(nn.Module):
         y = self.dropout(self.conv2(y).transpose(-1, 1))
 
         return self.norm3(x + y)
-
 
 class Decoder(nn.Module):
     def __init__(self, layers, norm_layer=None, projection=None):

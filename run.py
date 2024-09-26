@@ -75,7 +75,7 @@ if __name__ == '__main__':
     parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
     parser.add_argument('--learning_rate', type=float, default=0.0001, help='optimizer learning rate')
     parser.add_argument('--des', type=str, default='test', help='exp description')
-    parser.add_argument('--loss', type=str, default='MSE', help='loss function')
+    parser.add_argument('--loss', type=str, default='MAE', help='loss function')
     parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
     parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
     parser.add_argument('--rev', action='store_true', help='whether to apply RevIN')
@@ -109,7 +109,7 @@ if __name__ == '__main__':
     parser.add_argument('--avg', action='store_true', help='avg pooling', default=False)
     parser.add_argument('--max', action='store_true', help='max pooling', default=False)
     parser.add_argument('--reduction', type=int, default=2)
-    parser.add_argument('--channel_att', action='store_true', help='channel attention', default=False)
+    parser.add_argument('--gddmlp', action='store_true', help='global data-dependent mlp', default=False)
     parser.add_argument('--channel_mixup', action='store_true', help='channel mixup', default=False)
     parser.add_argument('--sigma', type=float, default=1.0)
 
@@ -137,7 +137,7 @@ if __name__ == '__main__':
         for ii in range(args.itr):
             # setting record of experiments
             exp = Exp(args)  # set experiments
-            setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_std{}_el{}_rd{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(
+            setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_std{}_el{}_rd{}_df{}_fc{}_eb{}_dt{}_bs{}_{}_{}'.format(
                 args.task_name,
                 args.model_id,
                 args.model,
@@ -154,6 +154,7 @@ if __name__ == '__main__':
                 args.factor,
                 args.embed,
                 args.distil,
+                args.batch_size,
                 args.des, ii)
 
             print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
@@ -164,7 +165,7 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
     else:
         ii = 0
-        setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_std{}_el{}_rd{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(
+        setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_std{}_el{}_rd{}_df{}_fc{}_eb{}_dt{}_bs{}_{}_{}'.format(
             args.task_name,
             args.model_id,
             args.model,
@@ -181,6 +182,7 @@ if __name__ == '__main__':
             args.factor,
             args.embed,
             args.distil,
+            args.batch_size,
             args.des, ii)
 
         exp = Exp(args)  # set experiments

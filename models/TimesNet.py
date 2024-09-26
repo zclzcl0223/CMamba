@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.fft
 from layers.Embed import DataEmbedding
 from layers.Conv_Blocks import Inception_Block_V1
-from layers.ChannelAttention import ChannelAttention
+from layers.GDDMLP import GDDMLP
 
 
 def FFT_for_Period(x, k=2):
@@ -100,10 +100,10 @@ class Model(nn.Module):
             self.dropout = nn.Dropout(configs.dropout)
             self.projection = nn.Linear(
                 configs.d_model * configs.seq_len, configs.num_class)
-        self.channel_att = configs.channel_att
-        if self.channel_att:
-            print("Channel Attention")
-            self.ChannelAttention = ChannelAttention(configs.enc_in, configs.reduction, 
+        self.gddmlp = configs.gddmlp
+        if self.gddmlp:
+            print("Insert GDDMLP")
+            self.GDDMLP = GDDMLP(configs.enc_in, configs.reduction, 
                                                  configs.avg, configs.max)
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
@@ -125,10 +125,10 @@ class Model(nn.Module):
             enc_out = self.layer_norm(self.model[i](enc_out))
         # porject back
         dec_out = self.projection(enc_out)
-        if self.channel_att:
+        if self.gddmlp:
             x_enc = x_enc.transpose(1, 2)
-            x_enc = self.ChannelAttention(x_enc.unsqueeze(-1))
-            x_enc = x_enc.squeeze(-1)
+            x_enc = self.GDDMLP(x_enc.unsqueeze(-2))
+            x_enc = x_enc.squeeze(-2)
             x_enc = x_enc.transpose(1, 2)
         # De-Normalization from Non-stationary Transformer
         dec_out = dec_out * \

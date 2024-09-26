@@ -3,6 +3,13 @@ from torch import nn
 from layers.Embed import PatchEmbedding
 from layers.CMambaEncoder import CMambaEncoder
 
+
+def init_weights(m):
+    if type(m) == nn.Linear:
+        nn.init.xavier_uniform_(m.weight)
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+
 class FlattenHead(nn.Module):
     def __init__(self, n_vars, nf, target_window, head_dropout=0):
         super().__init__()
@@ -39,7 +46,8 @@ class Model(nn.Module):
         self.head_nf = configs.d_model * configs.patch_num
         self.head = FlattenHead(configs.enc_in, self.head_nf, configs.pred_len,
                                 head_dropout=configs.head_dropout)
-        
+        #self.apply(init_weights)
+
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         # Instance Normalization
         means = x_enc.mean(1, keepdim=True).detach()

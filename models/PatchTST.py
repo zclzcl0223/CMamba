@@ -51,7 +51,7 @@ class Model(nn.Module):
                     configs.d_ff,
                     dropout=configs.dropout,
                     activation=configs.activation,
-                    channel_att=configs.channel_att,
+                    gddmlp=configs.gddmlp,
                     configs=configs
                 ) for l in range(configs.e_layers)
             ],

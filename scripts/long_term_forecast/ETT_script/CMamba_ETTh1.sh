@@ -4,11 +4,21 @@ if [ ! -d "./log" ]; then
     mkdir ./log
 fi
 
+if [ ! -d "./log/CMamba" ]; then
+    mkdir ./log/CMamba
+fi
+
+if [ ! -d "./log/CMamba/etth1" ]; then
+    mkdir ./log/CMamba/etth1
+fi
+
 model_name=CMamba
 
 for seq_len in 96
 do
-for pred_len in 96 192 336
+for pred_len in 96 336 720
+do
+for seed in 2021
 do
 python -u run.py \
   --task_name long_term_forecast \
@@ -20,12 +30,12 @@ python -u run.py \
   --data ETTh1 \
   --features M \
   --seq_len $seq_len \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --lradj type3 \
-  --patience 10 \
+  --patience 3 \
   --train_epochs 100 \
-  --e_layers 4 \
+  --e_layers 3 \
   --factor 3 \
   --enc_in 7 \
   --dec_in 7 \
@@ -36,23 +46,26 @@ python -u run.py \
   --pscan \
   --dropout 0.1 \
   --head_dropout 0.1 \
-  --learning_rate 0.0001 \
+  --learning_rate 0.0005 \
   --batch_size 64 \
   --num_workers 1 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 2 \
-  --itr 1 >> ./log/log_etth1_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/etth1/$seq_len'_'$pred_len.txt
 done
 done
-
+done
 
 for seq_len in 96
 do
-for pred_len in 720
+for pred_len in 192
+do
+for seed in 2021
 do
 python -u run.py \
   --task_name long_term_forecast \
@@ -64,10 +77,10 @@ python -u run.py \
   --data ETTh1 \
   --features M \
   --seq_len $seq_len \
-  --label_len 48 \
+  --label_len 0 \
   --pred_len $pred_len \
   --lradj type3 \
-  --patience 10 \
+  --patience 3 \
   --train_epochs 100 \
   --e_layers 2 \
   --factor 3 \
@@ -80,15 +93,17 @@ python -u run.py \
   --pscan \
   --dropout 0.1 \
   --head_dropout 0.1 \
-  --learning_rate 0.0001 \
+  --learning_rate 0.0005 \
   --batch_size 64 \
   --num_workers 1 \
   --channel_mixup \
   --sigma 1.0 \
-  --channel_att \
+  --gddmlp \
   --avg \
   --max \
   --reduction 2 \
-  --itr 1 >> ./log/log_etth1_$seq_len'_'$pred_len.txt
+  --seed $seed \
+  --itr 1 | tee -a ./log/CMamba/etth1/$seq_len'_'$pred_len.txt
+done
 done
 done
