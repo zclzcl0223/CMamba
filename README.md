@@ -7,7 +7,7 @@ In this repository, we present the code of "CMamba: Channel Correlation Enhanced
 
 ## Updates
 
-- **News** (2024.9.26) An updated version of our model has replaced the original one in this ropository. The arXiv will also been updated soon.
+- **News** (2024.9.26) An updated version of our model has replaced the original one in this ropository. The arXiv will also be updated soon.
 
 ## Data
 
