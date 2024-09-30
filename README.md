@@ -40,6 +40,8 @@ The default `seq_len` in this repository is `96`. For other experimental setting
 --head_dropout    # dropout before the final linear projection layer
 --d_model         # dimension of patch embedding
 --d_ff            # dimension of linear projection in Mamba
+--channel_mixup   # enable Channel Mixup
+--gddmlp          # enable GDD-MLP
 --sigma           # standard derivation for Channel Mixup
 --reduction       # reduction rate (expansion rate in paper) for GDD-MLP
 ```
