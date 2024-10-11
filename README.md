@@ -18,6 +18,8 @@ All the datasets are available at [Autoformer: Google Drive](https://drive.googl
 
 We implement our code in `Python 3.9` and `CUDA 11.7`. See [requirments.txt](./requirements.txt) for other packages. For convenience, you can install using the following commands:
 ```
+conda create -n cmamba python=3.9
+
 pip install https://download.pytorch.org/whl/cu117_pypi_cudnn/torch-2.0.0%2Bcu117.with.pypi.cudnn-cp39-cp39-linux_x86_64.whl
 
 pip install -r requirements.txt
