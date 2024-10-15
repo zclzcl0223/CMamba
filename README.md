@@ -44,7 +44,7 @@ The default `seq_len` in this repository is `96`. For other experimental setting
 --d_ff            # dimension of linear projection in Mamba
 --channel_mixup   # enable Channel Mixup
 --gddmlp          # enable GDD-MLP
---sigma           # standard derivation for Channel Mixup
+--sigma           # standard deviation for Channel Mixup
 --reduction       # reduction rate (expansion rate in paper) for GDD-MLP
 ```
 It is recommended to tune `e_layers` in {2, 3, 4, 5}, `d_model=d_ff` in {128, 256}, `sigma` in {0.1, 0.5, 1.0,..., 5.0}, and `reduction` in {2, 4, 8}.
