@@ -12,11 +12,11 @@ In this repository, we present the code of "CMamba: Channel Correlation Enhanced
 
 ## Data
 
-All the datasets are available at [Autoformer: Google Drive](https://drive.google.com/drive/folders/1ZOYpTUa82_jCcxIdTmyr0LXQfvaM9vIy). You only need to download `electricity`, `ETT-small`, `traffic`, and `weather`.
+All the datasets are available at [Autoformer: Google Drive](https://drive.google.com/drive/folders/1ZOYpTUa82_jCcxIdTmyr0LXQfvaM9vIy). You only need to download `electricity`, `ETT-small`, `traffic`, `weather` and put them under `./dataset/`.
 
 ## Environment
 
-We implement our code in `Python 3.9` and `CUDA 11.7`. See [requirments.txt](./requirements.txt) for other packages. For convenience, you can install using the following commands:
+We implement our code in `Python 3.9` and `CUDA 11.7`. See [./requirments.txt](./requirements.txt) for other packages. For convenience, you can install using the following commands:
 ```
 conda create -n cmamba python=3.9
 
@@ -27,9 +27,9 @@ pip install -r requirements.txt
 
 ## Reproducibility
 
-All the training scripts are provided in [scripts/long_term_forecast](./scripts/long_term_forecast). For instance, if you want to get the results for the `weather` dataset, you just need to run:
+All the training scripts are provided in [./scripts/long_term_forecast](./scripts/long_term_forecast). For instance, if you want to get the results for the `electricity` (or `ecl`) dataset, you just need to run:
 ```
-bash ./scripts/long_term_forecast/Weather_script/CMamba.sh
+bash ./scripts/long_term_forecast/ECL_script/CMamba.sh
 ``` 
 The default `seq_len` in this repository is `96`. For other experimental settings, the hyperparameters that you can tune are:
 ```
@@ -62,10 +62,10 @@ bash ./all.sh
 
 ## Results
 
-- Checkpoints for each model will be saved in `checkpoints/`;
-- Training log will be saved in `log/`;
-- Prediction for the testing set will be saved in `results/` (if needed);
-- Visualization for the results of testing set will be saved in `test_results/`.
+- Checkpoints for each model will be saved in `./checkpoints/`;
+- Training log will be saved in `./log/`;
+- Prediction for the testing set will be saved in `./results/` (if needed);
+- Visualization for the results of testing set will be saved in `./test_results/`.
 
 ## Acknowledgement
 
